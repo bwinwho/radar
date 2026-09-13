@@ -6,7 +6,7 @@ A single-page web app for sending a file directly from one browser to another, p
 
 ## What Is This?
 
-RADAR lets two people connect their browsers directly to each other and send a file, without uploading it to a server first. Each visitor is given a random callsign like `NEON-42`; one person shares their callsign with the other, who types it in to "Establish Link." Once connected, either side can pick a file to send, and both sides watch a live speed and progress readout while it transfers.
+RADAR lets two people connect their browsers directly to each other and send something — a file, a photo/video, or whatever's on your clipboard — without uploading it to a server first. Each visitor gets a callsign, random by default (like `NEON-42`) or a custom one you set yourself; one person shares their callsign with the other, who types it in to "Establish Link." If the other device isn't online yet, RADAR keeps trying for up to a minute before giving up, so you don't have to time it perfectly. Once connected, either side can send, and both sides watch a live speed and progress readout while it transfers.
 
 The whole app is one file: `index.html`, in the repository root.
 
@@ -18,12 +18,15 @@ The whole app is one file: `index.html`, in the repository root.
 
 ### Available (confirmed from `index.html`)
 
-- Generates a random, memorable "callsign" identity for each visitor (no sign-up or account).
-- Lets one visitor connect directly to another by typing their callsign.
+- Generates a random, memorable "callsign" identity for each visitor (no sign-up or account) — and remembers it across visits, so it doesn't change every time you reload the page.
+- A Settings panel (gear icon) lets you replace your callsign with your own custom one, as long as it's exactly 3 or 4 words (e.g. "apple river stone").
+- Lets one visitor connect directly to another by typing their callsign. If the other device isn't online yet, RADAR automatically retries for up to 60 seconds, showing a countdown, before giving up — you can also cancel manually at any time.
 - Remembers the last 3 peers you've connected to (in your browser only) so you can reconnect with one click.
-- Sends a file of any type directly between the two connected browsers, in the background, over a direct peer-to-peer connection — the file does not pass through a server that stores it.
-- Shows a live transfer speed (KBPS and MB/s) and a progress bar with a percentage and byte count while a file is sending or receiving.
-- Automatically downloads the received file on the receiving side once the transfer completes.
+- Three ways to send once connected: **File** (any file type), **Media** (opens your photo/video picker or camera on mobile), and **Paste** (sends whatever's currently on your clipboard — an image or text).
+- Sends directly between the two connected browsers, in the background, over a direct peer-to-peer connection — nothing passes through a server that stores it.
+- Shows a live transfer speed (KBPS and MB/s) and a progress bar with a percentage and byte count while something is sending or receiving.
+- Automatically downloads the received item on the receiving side once the transfer completes.
+- Works as a centered card on desktop and a naturally stacking, scrollable screen on mobile.
 
 ### Planned
 

@@ -3,11 +3,11 @@
 **Project:** RADAR (confirmed from `index.html` page title and heading)
 **Last Updated:** 2026-09-13
 **Current Stage:** Working single-file P2P file-transfer web app; deployed (owner-stated) to Cloudflare Pages
-**Current Focus:** CODEKIT documentation brought back in sync with the actual application code
+**Current Focus:** Just reworked the UI/UX (responsive layout, settings/custom callsign, File/Media/Paste, connect retry); CODEKIT kept in sync in the same task
 
 ## What This Project Is
 
-RADAR is a single-page, client-only web app that lets two browsers exchange a file directly over a WebRTC peer-to-peer connection, using [PeerJS](https://peerjs.com/) for connection signaling. Each visitor gets a random callsign (e.g. `NEON-42`); typing a peer's callsign and clicking "Establish Link" opens a direct P2P link, after which either side can send a file with a live speed/progress readout. The whole app is one file, `index.html`.
+RADAR is a single-page, client-only web app that lets two browsers exchange a file directly over a WebRTC peer-to-peer connection, using [PeerJS](https://peerjs.com/) for connection signaling. Each visitor gets a callsign — random by default (e.g. `NEON-42`), or a custom 3-4 word one set in Settings — that now persists across reloads. Typing a peer's callsign and clicking "Establish Link" opens a direct P2P link (retrying for up to 60 seconds if the target isn't online yet, with a live countdown and a Cancel option), after which either side can send a file, a media item, or their clipboard contents, with a live speed/progress readout. The whole app is one file, `index.html`.
 
 ## Current Architecture
 
@@ -24,29 +24,32 @@ One HTML file (`index.html`) containing inline CSS and JavaScript, plus one CDN 
 
 ## Currently Working On
 
-Getting CODEKIT's documentation to match the real, already-built RADAR app (it previously described an empty workspace from 2026-09-12, before the app code existed in this location). Next development task on the app itself has not been specified by the owner yet.
+Just finished a UI/UX rework requested by the owner (see Recently Changed). Next development task on the app itself has not been specified beyond that.
 
 ## Recently Changed
 
-- **2026-09-13:** Rewrote all seven CODEKIT files to document the actual RADAR app (`index.html`) instead of the earlier "empty workspace" baseline. No application code was changed.
+- **2026-09-13:** UI/UX rework: responsive `100dvh`-safe layout for desktop and mobile; a Settings panel to set a persistent custom callsign (exactly 3-4 words); own callsign now persists across reloads (`localStorage['radar_my_id']`); replaced the single send button with File / Media / Paste (clipboard) actions; connecting now retries for up to 60 seconds with a live countdown before auto-cancelling if the target is offline, plus a manual Cancel option. Found and fixed two layout bugs along the way (a flex/word-break bug that stacked the callsign display one letter per line, and a `justify-content: center` overflow bug that made the header unreachable) — see [DEVLOG.md](DEVLOG.md).
+- **2026-09-13:** Rewrote all seven CODEKIT files to document the actual RADAR app (`index.html`) instead of the earlier "empty workspace" baseline.
 - **2026-09-12:** Inspected the empty workspace and confirmed local Git history was unavailable (this was true of the CODEKIT folder in isolation at that time, before it was joined with the RADAR app code in this repository).
 - **2026-09-12:** Created all seven documentation files, including communication preferences and same-task documentation maintenance rules.
 
 ## Known Bugs
 
-None confirmed through code inspection or testing. One code-review observation, not yet confirmed as a bug: the receiver buffers the entire incoming file in memory before saving it, which could be a problem for very large transfers (see [AGENTS.md](AGENTS.md#constraints-and-fragile-areas)).
+None currently open. Two layout bugs introduced during the 2026-09-13 UI rework were found and fixed in the same session (see [DEVLOG.md](DEVLOG.md) "Bugs Found"). One code-review observation, not a confirmed bug: the receiver buffers the entire incoming file in memory before saving it, which could be a problem for very large transfers (see [AGENTS.md](AGENTS.md#constraints-and-fragile-areas)).
 
 ## Known Risks / Fragile Areas
 
-- Connectivity depends on PeerJS's default public signaling server and on plain STUN (no configured TURN server), so some network setups may fail to connect P2P. Not tested from this workspace.
+- Connectivity depends on PeerJS's default public signaling server and on plain STUN (no configured TURN server), so some network setups may fail to connect P2P. Not tested against the real service from this workspace (see DEVLOG "Notes" for why).
 - Two files named `NothingHere` (repo root and inside `CODEKIT/`) have unexplained purpose.
 - Deployment details (Cloudflare Pages build/publish settings) are owner-stated, not confirmed by config files in the repo.
+- The connect/retry/timeout logic and Paste-from-clipboard were verified against a stub `Peer`/UI state machine in headless Chromium, not against real PeerJS signaling or a real clipboard permission prompt — a real two-device test against the deployed site is recommended.
 
 ## Next Logical Steps
 
-1. Confirm/document the Cloudflare Pages deployment setup for `radatit.pages.dev`.
-2. Decide what to do with the two `NothingHere` placeholder files.
-3. Beyond that, further RADAR feature work awaits explicit direction from the owner.
+1. Real-device verification of the new connect-retry/timeout flow and all three send actions (especially clipboard permission prompts on mobile) against the deployed site.
+2. Confirm/document the Cloudflare Pages deployment setup for `radatit.pages.dev`.
+3. Decide what to do with the two `NothingHere` placeholder files.
+4. Beyond that, further RADAR feature work awaits explicit direction from the owner.
 
 These are prerequisites identified by inspection, not an approved product roadmap.
 

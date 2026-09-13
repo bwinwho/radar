@@ -22,8 +22,11 @@ Two people each open the page, get a randomly generated callsign, and connect di
 
 Confirmed, implemented features only (see [AGENTS.md](AGENTS.md) for code references):
 
-- **Instant identity, no sign-up:** a random callsign (e.g. `NEON-42`) is generated on load — nothing to register.
-- **Direct peer-to-peer transfer:** files move browser-to-browser over WebRTC once connected, not through a storage server.
+- **Instant identity, no sign-up:** a callsign (e.g. `NEON-42`) is generated on first visit and remembered — nothing to register, and it doesn't change on you.
+- **Your own callsign:** swap the generated callsign for a custom 3-4 word one from Settings.
+- **Patient connecting:** if the other device isn't online yet, RADAR keeps trying for up to 60 seconds with a visible countdown, instead of failing instantly.
+- **Three ways to send:** File, Media (photo/video), or Paste (clipboard) — pick whichever fits what you're sharing.
+- **Direct peer-to-peer transfer:** data moves browser-to-browser over WebRTC once connected, not through a storage server.
 - **Live telemetry:** real-time speed (KBPS/MB per second) and a progress bar during transfer.
 - **Recent targets:** the last 3 peers connected to are remembered locally for one-click reconnect.
 

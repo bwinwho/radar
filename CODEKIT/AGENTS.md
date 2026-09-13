@@ -48,15 +48,28 @@ Single entry point: `index.html`. There is no router, no server, no database, an
 
 High-level flow, traced from the code:
 
-1. On load, the page generates a random human-readable callsign (`WORD-NN`, e.g. `NEON-42`) client-side and creates a PeerJS `Peer` using that callsign as the peer ID (`index.html:118-128`).
-2. `loadRecentPeers()` reads `localStorage.radar_recent` and renders up to 3 quick-connect buttons (`index.html:295-308`).
-3. The local user either waits for an incoming connection (`peer.on('connection', ...)`, `index.html:150-153`) or types a target callsign and clicks "Establish Link", which calls `peer.connect(peerId)` (`index.html:155-165`).
-4. Once a `DataConnection` opens (`conn.on('open')`), the UI swaps from the connect panel to the transfer panel and the connected peer's ID is saved to `localStorage` via `saveRecentPeer()` (`index.html:173-180`).
-5. Sending a file: `fileInput` change handler reads the chosen file in `256 KB` chunks with `FileReader`, sends a `{type:'header', filename, size}` message, then streams `{type:'chunk', chunk}` messages, checking `conn.dataChannel.bufferedAmount` and delaying with `setTimeout` when it exceeds `16 MB` (basic backpressure), and finally sends `{type:'eof'}` (`index.html:212-256`).
-6. Receiving a file: `conn.on('data', ...)` accumulates chunks into `receiveBuffer`, and on `eof` assembles a `Blob`, creates an object URL, and triggers a download via a synthetic `<a download>` click (`index.html:182-210`).
-7. `updateTelemetryUI()` computes instantaneous KBPS/MBPS and progress-bar percentage from elapsed time and bytes transferred so far, on both sender and receiver (`index.html:259-275`).
+1. On load, `loadOrCreateMyId()` reads a persisted callsign from `localStorage['radar_my_id']`, or generates a random one (`WORD-NN`, e.g. `NEON-42`) and persists it, so the same visitor keeps the same callsign across reloads until they change it. `createPeer(id)` then creates a PeerJS `Peer` using that callsign as the peer ID and wires its `open`/`connection`/`error` handlers.
+2. `loadRecentPeers()` reads `localStorage.radar_recent` and renders up to 3 quick-connect buttons.
+3. The local user either waits for an incoming connection (`peer.on('connection', ...)`) or types a target callsign and clicks "Establish Link", which calls `initiateConnection(peerId)`.
+4. `initiateConnection` starts a 60-second connection window (`CONNECT_TIMEOUT_MS`): it calls `attemptConnect(peerId)` (`peer.connect(...)`) and shows a live countdown. If the target isn't currently online, PeerJS reports `error.type === 'peer-unavailable'` on the `peer` object; `handlePeerUnavailable()` retries `attemptConnect` every 3 seconds (`RETRY_INTERVAL_MS`) until either the connection opens or the 60-second deadline passes, at which point `stopConnecting()` auto-cancels with a "LINK TIMEOUT" message. The user can also cancel manually at any time via the Cancel button.
+5. Once a `DataConnection` opens (`conn.on('open')` inside `attemptConnect`, handled by `setupConnection()`), the UI swaps from the connect panel to the transfer panel, the connected peer's ID is saved to `localStorage` via `saveRecentPeer()`, and a `conn.on('close')` handler reverts the UI if the link drops.
+6. Sending data: `sendFile(file)` is the shared send path for all three send actions (File, Media, Paste — see below). It reads the file in `256 KB` chunks with `FileReader`, sends a `{type:'header', filename, size}` message, then streams `{type:'chunk', chunk}` messages, checking `conn.dataChannel.bufferedAmount` and delaying with `setTimeout` when it exceeds `16 MB` (basic backpressure), and finally sends `{type:'eof'}`.
+7. Receiving a file: `conn.on('data', ...)` accumulates chunks into `receiveBuffer`, and on `eof` assembles a `Blob`, creates an object URL, and triggers a download via a synthetic `<a download>` click.
+8. `updateTelemetryUI()` computes instantaneous KBPS/MBPS and progress-bar percentage from elapsed time and bytes transferred so far, on both sender and receiver.
 
 There is no server-side code in this repository; the only network dependency is the PeerJS signaling connection used to establish the WebRTC link, after which the file data flows directly peer-to-peer.
+
+### Send actions: File / Media / Paste
+
+The transfer panel has three send buttons, all funneling into the same `sendFile(file)` path:
+
+- **File** (`#fileBtn`) — clicks the hidden generic `#fileInput` (`accept` not restricted).
+- **Media** (`#mediaBtn`) — clicks the hidden `#mediaInput`, which has `accept="image/*,video/*"` so mobile browsers offer camera/gallery pickers restricted to media types.
+- **Paste** (`#pasteBtn`) — calls `sendFromClipboard()`, which reads `navigator.clipboard.read()` first (sending the first image item found as a `File`), and falls back to `navigator.clipboard.readText()` (sent as `clipboard.txt`) if no image is on the clipboard. Clipboard permission failures are caught and surfaced in the status line ("CLIPBOARD ACCESS DENIED.").
+
+### Settings: custom callsign
+
+The gear icon (`#settingsBtn`) opens a modal (`#settingsOverlay`) where the user can set a custom callsign. `parseCustomCallsign(raw)` requires **exactly 3 or 4** space/dash-separated alphabetic words (`index.html`, function `parseCustomCallsign`); anything else shows an inline validation error and nothing is saved. A valid callsign is upper-cased, dash-joined (e.g. `APPLE-RIVER-STONE`), persisted via `saveMyId()` to `localStorage['radar_my_id']`, and applied immediately by destroying the current `Peer` and calling `createPeer()` again with the new ID — any active connection is dropped and the UI reverts to the connect panel. "Use Random Callsign" regenerates a `WORD-NN` id the same way.
 
 ## Repository Map
 
@@ -78,12 +91,22 @@ There is no server-side code in this repository; the only network dependency is 
 There are no separate modules or files beyond `index.html`; all logic is inline `<script>` code organized into top-level functions:
 
 - `generateId()` — random callsign generator (word list + 2-digit number).
-- `setupConnection(connectedId)` — wires up `conn.on('open')` and `conn.on('data')` handlers for a given `DataConnection`.
-- `initiateConnection(peerId)` — starts an outbound `peer.connect()`.
+- `parseCustomCallsign(raw)` — validates/normalizes a user-entered 3-4 word callsign.
+- `loadOrCreateMyId()` / `saveMyId(id)` — `localStorage`-backed persistent own-identity.
+- `createPeer(id)` — (re)creates the PeerJS `Peer` and its `open`/`connection`/`error` handlers.
+- `initiateConnection(peerId)` / `attemptConnect(peerId)` / `handlePeerUnavailable()` / `startCountdown()` / `stopConnecting(message)` — the 60-second connect/retry/timeout/cancel state machine.
+- `setupConnection(connectedId)` — wires up `conn.on('open')`/`close`/`data` handlers for an established `DataConnection`.
+- `sendFile(file)` — shared chunked-send path used by File, Media, and Paste.
+- `sendFromClipboard()` — reads the clipboard and hands an image or text `File` to `sendFile()`.
 - `updateTelemetryUI(currentBytes, totalBytes, startTime)` / `resetTelemetryUI()` — transfer speed/progress display.
 - `saveRecentPeer(id)` / `loadRecentPeers()` — `localStorage`-backed recent-peers list.
 
-Data model: no database. The only persisted state is `localStorage['radar_recent']`, a JSON array of up to 3 peer-ID strings. In-memory transfer state (`receiveBuffer`, `receiveMeta`, `receiveBytes`, `receiveStartTime`) lives in page-global variables and is not persisted.
+Data model: no database. Persisted state, all in `localStorage`:
+
+- `radar_my_id` — the visitor's own callsign (random or custom), so it survives reloads.
+- `radar_recent` — a JSON array of up to 3 recently connected peer-ID strings.
+
+In-memory transfer state (`receiveBuffer`, `receiveMeta`, `receiveBytes`, `receiveStartTime`) and connect-retry state (`pendingPeerId`, `pendingDeadline`, `retryTimer`, `countdownTimer`) live in page-global variables and are not persisted.
 
 Wire protocol between peers (over the PeerJS `DataConnection`, all plain JS objects sent via `conn.send()`):
 
@@ -93,9 +116,10 @@ Wire protocol between peers (over the PeerJS `DataConnection`, all plain JS obje
 
 ## Important Flows
 
-- **Connecting:** covered under Architecture above. No login/auth exists; the "identity" is just a randomly generated, unauthenticated callsign string.
-- **File transfer (send/receive):** covered under Architecture above; this is the app's core feature.
-- **Reconnecting to a recent peer:** clicking a button in the "Recent Targets" list calls `initiateConnection(id)` with a previously seen peer ID (`index.html:300-305`).
+- **Connecting (with wait/retry/cancel):** covered under Architecture above. No login/auth exists; the "identity" is just a callsign string (random or user-chosen), unauthenticated.
+- **File transfer (send/receive) via File, Media, or Paste:** covered under Architecture above; this is the app's core feature.
+- **Reconnecting to a recent peer:** clicking a button in the "Recent Targets" list calls `initiateConnection(id)` with a previously seen peer ID.
+- **Changing your callsign:** covered under "Settings: custom callsign" above.
 - Navigation, payments, and search: not applicable — none exist in this app.
 
 ## External Services and Configuration
@@ -114,7 +138,9 @@ Wire protocol between peers (over the PeerJS `DataConnection`, all plain JS obje
 
 - The app is intentionally a single self-contained HTML file with inline CSS/JS and one CDN script dependency (PeerJS) — no build tooling.
 - UI copy uses a "telemetry / military radar" theme (callsigns, "uplink", "transmission", monospace status line) consistently throughout `index.html`.
-- Chunked transfer uses a fixed `256 KB` chunk size and a `16 MB` `bufferedAmount` backpressure threshold (`index.html:222, 237`); these are hardcoded constants, not configurable.
+- Chunked transfer uses a fixed `256 KB` chunk size and a `16 MB` `bufferedAmount` backpressure threshold; these are hardcoded constants, not configurable.
+- Connection attempts use a fixed `60000 ms` total timeout (`CONNECT_TIMEOUT_MS`) and a `3000 ms` retry interval (`RETRY_INTERVAL_MS`) while the target is offline; also hardcoded.
+- Layout: the page is a single vertically-centered `.app` column (`max-width: 420px`) using `min-height: 100dvh` with `justify-content: safe center` on `body`, so it works as a centered card on desktop and a naturally stacking/scrolling column on mobile without ever clipping content above the viewport if it grows taller than the screen. Prefer `overflow-wrap` over `word-break: break-word` on flex children that sit next to another element (e.g. the callsign display) — `break-word` inside a shrinkable flex item can force per-character line-wrapping once the item's content forces it below its natural width; this was hit and fixed during the 2026-09-13 UI rework (see DEVLOG).
 - The owner requested a permanent seven-file `CODEKIT/` documentation kit; meaningful code work must include the relevant documentation updates in the same task (see [DOCUMENTATION_RULES.md](DOCUMENTATION_RULES.md)).
 
 ## Constraints and Fragile Areas
@@ -127,11 +153,16 @@ Wire protocol between peers (over the PeerJS `DataConnection`, all plain JS obje
 
 ## Known Problems and Testing
 
-No automated tests or test configuration exist in this repository. No confirmed application bugs have been identified through code inspection alone; this is not evidence the app is bug-free, since it has not been run or tested from this workspace. The potential large-file memory concern noted above is a code-review observation, not a confirmed bug.
+No automated tests or test configuration exist in this repository. During the 2026-09-13 UI rework, the app was manually exercised with Playwright/Chromium (headless, at both a 1280x800 desktop viewport and a 390x844 mobile viewport) against a local static server, using a stub `Peer` implementation in place of the real PeerJS library (outbound requests to `unpkg.com` are blocked from this sandboxed workspace's Bash/network, though a real visitor's browser is not subject to that restriction). That session found and fixed two real bugs:
+
+- **Bug:** the callsign display, placed in a flex row next to a "Copy" button, would shrink and wrap one character per line once `word-break: break-word` was combined with flex shrinking, inflating page height. **Cause:** flex items can shrink below their content's natural width, and `break-word` allows breaking at any point once that happens. **Fix:** removed the flex row; the callsign now displays as a normal block with `overflow-wrap: anywhere` and the Copy button sits below it. **Status:** fixed and re-verified.
+- **Bug:** because `body` used `justify-content: center` for vertical centering, the inflated page height from the bug above pushed the header (including the Settings button) off-screen in a way that could not be reached by scrolling. **Cause:** centered flex/grid content that overflows its container overflows symmetrically, and browsers don't allow scrolling into the "before start" overflow region by default. **Fix:** changed to `justify-content: safe center`, which falls back to start-aligned (scrollable) behavior when content overflows. **Status:** fixed; kept as a defensive measure even after the root-cause layout bug was fixed, in case future content changes cause overflow again.
+
+Beyond those two, no other application bugs have been identified. This is not proof the app is fully bug-free — real PeerJS/WebRTC networking (actual signaling, NAT traversal, real file transfers) was not exercised, only UI wiring and state transitions against a stub. The potential large-file memory concern noted above is a code-review observation, not a confirmed bug.
 
 ## Agent Handoff
 
-- Current work: CODEKIT was updated on **2026-09-13** to describe the actual RADAR app now present in the repository, replacing the earlier "empty workspace" baseline recorded on 2026-09-12.
-- Completed: read `index.html` in full, confirmed repo structure and Git history, rewrote all seven CODEKIT files with evidence-based content.
-- Next logical work: confirm the Cloudflare Pages deployment configuration, and decide what to do with the two unexplained `NothingHere` files. Beyond that, next steps depend on what the owner wants to build on RADAR next — **Not confirmed yet**.
+- Current work: on **2026-09-13**, RADAR's UI/UX was reworked (100dvh-safe responsive layout, a Settings panel for a persistent custom 3-4 word callsign, File/Media/Paste send actions, and a 60-second connect wait/retry/cancel flow), and CODEKIT was updated in the same task to match, per this kit's own documentation rules.
+- Completed: read `index.html` in full before and after the change, implemented the UI rework, manually verified it with headless Playwright at desktop and mobile viewports (catching and fixing the two layout bugs above), and rewrote the relevant CODEKIT sections.
+- Next logical work: confirm the Cloudflare Pages deployment configuration, decide what to do with the two unexplained `NothingHere` files, and — since this workspace cannot reach the real PeerJS CDN or run true two-device WebRTC transfers — a real-device test of connect/retry/timeout and all three send actions (File/Media/Paste, including clipboard permission prompts) against the deployed site is still worth doing. Beyond that, next steps depend on what the owner wants to build on RADAR next — **Not confirmed yet**.
 - Caution: do not assume backend/server capability exists — this is a fully client-side app that depends on a third-party signaling service for peer discovery.

@@ -2,40 +2,59 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>RADAR // ACTIVE</title>
     <style>
-        :root { --bg: #050505; --text: #f4f4f4; --accent: #ff2a2a; --grid: #111; }
+        :root { --bg: #050505; --text: #f4f4f4; --accent: #ff2a2a; --grid: #111; --muted: #666; --border: #333; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
-        body { background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; padding-bottom: 2rem; }
-        
-        /* Swiss / Telemetry Typography */
-        header { width: 100%; max-width: 400px; margin-top: 2rem; padding: 0 1rem; }
-        h1 { font-size: 3rem; font-weight: 800; letter-spacing: -2px; text-transform: uppercase; line-height: 1; }
-        .subtitle { font-size: 0.7rem; text-transform: uppercase; color: #888; letter-spacing: 1px; margin-bottom: 2rem; }
+        html, body { height: 100%; }
+        body {
+            background: var(--bg); color: var(--text);
+            min-height: 100vh; min-height: 100dvh;
+            display: flex; flex-direction: column; align-items: center; justify-content: safe center;
+            padding: 1.75rem 1rem; padding-bottom: max(1.75rem, env(safe-area-inset-bottom));
+            overflow-x: hidden;
+        }
+
+        .app { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 1rem; }
+
+        /* Header */
+        .app-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+        h1 { font-size: clamp(2.2rem, 8vw, 3rem); font-weight: 800; letter-spacing: -2px; text-transform: uppercase; line-height: 1; }
+        .subtitle { font-size: 0.7rem; text-transform: uppercase; color: #888; letter-spacing: 1px; margin-top: 0.5rem; }
         .subtitle span { color: var(--accent); font-weight: bold; }
 
+        .icon-btn { background: transparent; border: 1px solid var(--border); color: var(--muted); width: 42px; height: 42px; flex-shrink: 0; font-size: 1.1rem; cursor: pointer; }
+        .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+
         /* Interface Boxes */
-        .panel { background: transparent; width: 100%; max-width: 400px; border: 1px solid #333; padding: 1.5rem; margin-bottom: 1rem; position: relative; }
+        .panel { background: transparent; width: 100%; border: 1px solid var(--border); padding: 1.5rem; position: relative; }
         .panel::before, .panel::after { content: ''; position: absolute; width: 8px; height: 8px; border: 1px solid var(--accent); }
         .panel::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
         .panel::after { bottom: -1px; right: -1px; border-left: none; border-top: none; }
-        
+
         .label { font-size: 0.65rem; text-transform: uppercase; color: #666; margin-bottom: 0.5rem; display: block; letter-spacing: 1px; }
-        .id-display { font-size: 3rem; font-weight: 800; color: var(--accent); letter-spacing: 1px; text-align: center; }
-        
-        input[type="text"] { width: 100%; padding: 1rem; background: var(--bg); border: 1px solid #333; color: var(--text); font-size: 1.5rem; text-align: center; margin-bottom: 1rem; outline: none; text-transform: uppercase; font-weight: bold; letter-spacing: 2px;}
+        .id-display { font-size: clamp(1.4rem, 6vw, 2.4rem); font-weight: 800; color: var(--accent); letter-spacing: 1px; text-align: center; overflow-wrap: anywhere; margin-bottom: 0.75rem; }
+        .copy-btn { width: auto; display: block; margin: 0 auto; background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 0.4rem 0.9rem; font-size: 0.65rem; text-transform: uppercase; cursor: pointer; }
+        .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+        input[type="text"] { width: 100%; padding: 1rem; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-size: 1.3rem; text-align: center; margin-bottom: 1rem; outline: none; text-transform: uppercase; font-weight: bold; letter-spacing: 2px; }
         input[type="text"]:focus { border-color: var(--accent); }
-        
-        button { width: 100%; background: var(--text); color: var(--bg); border: none; padding: 1rem; font-weight: 800; text-transform: uppercase; cursor: pointer; transition: all 0.2s; letter-spacing: 1px; }
+        input[type="text"]:disabled { opacity: 0.4; }
+
+        button { width: 100%; background: var(--text); color: var(--bg); border: none; padding: 1rem; font-weight: 800; text-transform: uppercase; cursor: pointer; transition: all 0.2s; letter-spacing: 1px; font-size: 0.9rem; }
         button:hover { background: var(--accent); color: var(--text); }
-        
-        .recent-btn { background: transparent; border: 1px solid #333; color: #888; margin-top: 0.5rem; font-size: 0.8rem; }
+        button:disabled { opacity: 0.4; cursor: not-allowed; }
+        button:disabled:hover { background: var(--text); color: var(--bg); }
+
+        .recent-btn { background: transparent; border: 1px solid var(--border); color: #888; margin-top: 0.5rem; font-size: 0.8rem; }
         .recent-btn:hover { background: #1a1a1a; color: var(--accent); border-color: var(--accent); }
+        .cancel-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); margin-top: 0.75rem; font-size: 0.75rem; }
+        .cancel-btn:hover { background: var(--accent); color: var(--text); }
         input[type="file"] { display: none; }
 
         /* Radar Animation */
-        .radar-box { display: flex; justify-content: center; align-items: center; height: 250px; position: relative; margin-bottom: 1rem; width: 100%; max-width: 400px; background: radial-gradient(circle, #1a0505 0%, var(--bg) 70%); border: 1px solid #222; overflow: hidden; }
+        .radar-box { display: flex; justify-content: center; align-items: center; height: min(250px, 55vw); position: relative; width: 100%; background: radial-gradient(circle, #1a0505 0%, var(--bg) 70%); border: 1px solid #222; overflow: hidden; }
         .grid-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-size: 20px 20px; background-image: linear-gradient(to right, var(--grid) 1px, transparent 1px), linear-gradient(to bottom, var(--grid) 1px, transparent 1px); z-index: 1; opacity: 0.5; }
         .radar-ring { position: absolute; border: 1px solid rgba(255,42,42,0.3); border-radius: 50%; z-index: 2; }
         .ring-1 { width: 80px; height: 80px; }
@@ -44,73 +63,128 @@
         .sweep { position: absolute; width: 120px; height: 120px; transform-origin: bottom right; top: 5px; left: 5px; background: linear-gradient(45deg, rgba(255,42,42,0.8) 0%, rgba(255,42,42,0) 100%); animation: sweep 2s linear infinite; z-index: 3; border-radius: 100% 0 0 0; }
         @keyframes sweep { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Telemetry UI */
+        /* Waiting / retry state */
+        #waitBox { display: none; text-align: center; }
+        .wait-countdown { font-size: 2rem; font-weight: 900; color: var(--accent); font-family: monospace; margin: 0.5rem 0; }
+
+        /* Send action row */
         #transferBox { display: none; border-color: var(--accent); }
-        .telemetry-speed { font-size: 3.5rem; font-weight: 900; color: var(--accent); line-height: 1; margin: 0.5rem 0; letter-spacing: -2px; }
-        .telemetry-mbps { font-size: 1.5rem; font-weight: bold; color: var(--text); margin-bottom: 1rem; }
-        
-        .progress-container { width: 100%; height: 20px; background: #111; border: 1px solid #333; margin-bottom: 0.5rem; position: relative; }
+        .action-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+        .action-btn { flex: 1; background: transparent; border: 1px solid var(--border); color: var(--text); padding: 0.9rem 0.4rem; font-size: 0.7rem; display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
+        .action-btn .glyph { font-size: 1.2rem; }
+        .action-btn:hover { border-color: var(--accent); color: var(--accent); background: transparent; }
+
+        .telemetry-speed { font-size: clamp(2.2rem, 9vw, 3.5rem); font-weight: 900; color: var(--accent); line-height: 1; margin: 0.5rem 0; letter-spacing: -2px; }
+        .telemetry-mbps { font-size: 1.3rem; font-weight: bold; color: var(--text); margin-bottom: 1rem; }
+
+        .progress-container { width: 100%; height: 20px; background: #111; border: 1px solid var(--border); margin-bottom: 0.5rem; position: relative; }
         .progress-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.1s linear; }
         .progress-stats { display: flex; justify-content: space-between; font-size: 0.7rem; color: #888; font-family: monospace; }
-        
-        #status { font-family: monospace; font-size: 0.8rem; color: #666; text-align: center; margin-top: 1rem; text-transform: uppercase; }
+
+        #status { font-family: monospace; font-size: 0.8rem; color: #666; text-align: center; text-transform: uppercase; }
         .glitch { animation: glitch 0.2s linear infinite; }
         @keyframes glitch { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
+
+        /* Settings modal */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 50; padding: 1rem; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: var(--bg); border: 1px solid var(--accent); padding: 1.5rem; width: 100%; max-width: 380px; position: relative; }
+        .modal-close { position: absolute; top: 0.75rem; right: 0.75rem; background: transparent; border: none; color: var(--muted); width: auto; padding: 0.25rem 0.5rem; font-size: 1.2rem; }
+        .modal-close:hover { background: transparent; color: var(--accent); }
+        .modal h2 { font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1.25rem; }
+        #customIdInput { font-size: 1rem; letter-spacing: 0.5px; }
+        .field-error { font-size: 0.7rem; color: var(--accent); min-height: 1.2em; margin: -0.6rem 0 0.75rem; text-transform: uppercase; font-family: monospace; }
+        .field-hint { font-size: 0.65rem; color: var(--muted); margin: -0.6rem 0 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .secondary-btn { background: transparent; border: 1px solid var(--border); color: #888; margin-top: 0.6rem; font-size: 0.75rem; }
+        .secondary-btn:hover { background: #1a1a1a; color: var(--accent); border-color: var(--accent); }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>Radar.</h1>
-        <div class="subtitle">Local Telemetry Over Wi-Fi // <span>Active</span></div>
-    </header>
-
-    <div class="radar-box">
-        <div class="grid-overlay"></div>
-        <div class="radar-ring ring-1"></div>
-        <div class="radar-ring ring-2"></div>
-        <div class="radar-ring ring-3"></div>
-        <div class="sweep"></div>
-    </div>
-
-    <div class="panel">
-        <span class="label">Identification Callsign</span>
-        <div class="id-display" id="myId">---</div>
-    </div>
-
-    <div class="panel" id="connectBox">
-        <span class="label">Target Coordinates (Peer ID)</span>
-        <input type="text" id="peerIdInput" placeholder="CODE-00" maxlength="7">
-        <button id="connectBtn">Establish Link</button>
-        
-        <div id="recentBox" style="display: none; margin-top: 1.5rem;">
-            <span class="label">Recent Targets</span>
-            <div id="recentList"></div>
-        </div>
-    </div>
-
-    <div class="panel" id="transferBox">
-        <span class="label">Linked To: <span id="connectedToId" style="color: var(--accent);"></span></span>
-        
-        <div style="margin: 2rem 0;">
-            <span class="label">Blazing High-Speed Telemetry</span>
-            <div class="telemetry-speed" id="speedKbps">0 KBPS</div>
-            <div class="telemetry-mbps" id="speedMbps">SPEED: 0.0 MB/S</div>
-            
-            <div class="progress-container">
-                <div class="progress-bar" id="progressBar"></div>
+    <div class="app">
+        <header class="app-header">
+            <div>
+                <h1>Radar.</h1>
+                <div class="subtitle">Local Telemetry Over Wi-Fi // <span>Active</span></div>
             </div>
-            <div class="progress-stats">
-                <span id="progressPercent">0%</span>
-                <span id="progressData">0.0 MB / 0.0 MB</span>
+            <button class="icon-btn" id="settingsBtn" title="Settings" aria-label="Settings">&#9881;</button>
+        </header>
+
+        <div class="radar-box">
+            <div class="grid-overlay"></div>
+            <div class="radar-ring ring-1"></div>
+            <div class="radar-ring ring-2"></div>
+            <div class="radar-ring ring-3"></div>
+            <div class="sweep"></div>
+        </div>
+
+        <div class="panel">
+            <span class="label">Identification Callsign</span>
+            <div class="id-display" id="myId">---</div>
+            <button class="copy-btn" id="copyIdBtn">Copy Callsign</button>
+        </div>
+
+        <div class="panel" id="connectBox">
+            <span class="label">Target Coordinates (Peer ID)</span>
+            <input type="text" id="peerIdInput" placeholder="CODE-00">
+            <button id="connectBtn">Establish Link</button>
+
+            <div id="waitBox">
+                <span class="label">Awaiting Target Response</span>
+                <div class="wait-countdown" id="waitCountdown">60S</div>
+                <button class="cancel-btn" id="cancelBtn">Cancel Uplink</button>
+            </div>
+
+            <div id="recentBox" style="display: none; margin-top: 1.5rem;">
+                <span class="label">Recent Targets</span>
+                <div id="recentList"></div>
             </div>
         </div>
 
-        <button id="sendFileBtn">Transmit Data</button>
-        <input type="file" id="fileInput">
+        <div class="panel" id="transferBox">
+            <span class="label">Linked To: <span id="connectedToId" style="color: var(--accent);"></span></span>
+
+            <div style="margin: 1.5rem 0 1rem;">
+                <span class="label">Send</span>
+                <div class="action-row">
+                    <button class="action-btn" id="fileBtn"><span class="glyph">&#128196;</span>File</button>
+                    <button class="action-btn" id="mediaBtn"><span class="glyph">&#128247;</span>Media</button>
+                    <button class="action-btn" id="pasteBtn"><span class="glyph">&#128203;</span>Paste</button>
+                </div>
+                <input type="file" id="fileInput">
+                <input type="file" id="mediaInput" accept="image/*,video/*">
+            </div>
+
+            <div style="margin: 1.5rem 0;">
+                <span class="label">Blazing High-Speed Telemetry</span>
+                <div class="telemetry-speed" id="speedKbps">0 KBPS</div>
+                <div class="telemetry-mbps" id="speedMbps">SPEED: 0.0 MB/S</div>
+
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div class="progress-stats">
+                    <span id="progressPercent">0%</span>
+                    <span id="progressData">0.0 MB / 0.0 MB</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="status">Awaiting Network...</div>
     </div>
 
-    <div id="status">Awaiting Network...</div>
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsOverlay">
+        <div class="modal">
+            <button class="modal-close" id="settingsClose" aria-label="Close">&times;</button>
+            <h2>Settings</h2>
+            <span class="label">Custom Callsign (3-4 words)</span>
+            <input type="text" id="customIdInput" placeholder="e.g. APPLE RIVER STONE">
+            <div class="field-error" id="customIdError"></div>
+            <button id="saveIdBtn">Save Callsign</button>
+            <button class="secondary-btn" id="randomIdBtn">Use Random Callsign</button>
+        </div>
+    </div>
 
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script>
@@ -121,11 +195,32 @@
             const n = Math.floor(10 + Math.random() * 90);
             return `${w}-${n}`;
         };
-        
-        const myId = generateId();
+
+        // A user-set callsign must be exactly 3-4 alphabetic words, e.g. "APPLE RIVER STONE"
+        function parseCustomCallsign(raw) {
+            const words = raw.trim().split(/[\s\-]+/).filter(Boolean);
+            if (words.length < 3 || words.length > 4) return null;
+            if (!words.every(w => /^[A-Za-z]{2,}$/.test(w))) return null;
+            return words.map(w => w.toUpperCase()).join('-');
+        }
+
+        const MY_ID_KEY = 'radar_my_id';
+        function loadOrCreateMyId() {
+            let id = localStorage.getItem(MY_ID_KEY);
+            if (!id) {
+                id = generateId();
+                localStorage.setItem(MY_ID_KEY, id);
+            }
+            return id;
+        }
+        function saveMyId(id) {
+            localStorage.setItem(MY_ID_KEY, id);
+        }
+
+        let myId = loadOrCreateMyId();
         document.getElementById('myId').innerText = myId;
 
-        const peer = new Peer(myId);
+        let peer;
         let conn;
 
         // UI Elements
@@ -133,9 +228,15 @@
         const connectBox = document.getElementById('connectBox');
         const transferBox = document.getElementById('transferBox');
         const fileInput = document.getElementById('fileInput');
+        const mediaInput = document.getElementById('mediaInput');
         const recentBox = document.getElementById('recentBox');
         const recentList = document.getElementById('recentList');
-        
+        const peerIdInput = document.getElementById('peerIdInput');
+        const connectBtn = document.getElementById('connectBtn');
+        const waitBox = document.getElementById('waitBox');
+        const waitCountdownEl = document.getElementById('waitCountdown');
+        const cancelBtn = document.getElementById('cancelBtn');
+
         // Telemetry Elements
         const speedKbpsEl = document.getElementById('speedKbps');
         const speedMbpsEl = document.getElementById('speedMbps');
@@ -144,24 +245,92 @@
         const progressDataEl = document.getElementById('progressData');
 
         loadRecentPeers();
+        createPeer(myId);
 
-        peer.on('open', () => statusEl.innerText = "SYSTEM READY. WAITING FOR TARGET.");
+        function createPeer(id) {
+            if (peer) peer.destroy();
+            conn = null;
+            peer = new Peer(id);
 
-        peer.on('connection', (connection) => {
-            conn = connection;
-            setupConnection(conn.peer);
-        });
+            peer.on('open', () => statusEl.innerText = "SYSTEM READY. WAITING FOR TARGET.");
 
-        document.getElementById('connectBtn').onclick = () => {
-            const peerId = document.getElementById('peerIdInput').value.toUpperCase();
+            peer.on('connection', (connection) => {
+                conn = connection;
+                setupConnection(conn.peer);
+            });
+
+            peer.on('error', (err) => {
+                if (err.type === 'peer-unavailable' && pendingPeerId) {
+                    handlePeerUnavailable();
+                } else if (err.type === 'unavailable-id') {
+                    statusEl.innerText = "CALLSIGN TAKEN. TRY ANOTHER.";
+                }
+            });
+        }
+
+        // --- Connection with wait/retry/timeout (60s) ---
+        const CONNECT_TIMEOUT_MS = 60000;
+        const RETRY_INTERVAL_MS = 3000;
+        let pendingPeerId = null;
+        let pendingDeadline = 0;
+        let retryTimer = null;
+        let countdownTimer = null;
+
+        connectBtn.onclick = () => {
+            const peerId = peerIdInput.value.toUpperCase();
             initiateConnection(peerId);
         };
+        cancelBtn.onclick = () => stopConnecting("UPLINK CANCELLED.");
 
         function initiateConnection(peerId) {
             if (!peerId) return;
+            pendingPeerId = peerId;
+            pendingDeadline = Date.now() + CONNECT_TIMEOUT_MS;
+            connectBtn.disabled = true;
+            peerIdInput.disabled = true;
+            waitBox.style.display = 'block';
             statusEl.innerText = "ESTABLISHING UPLINK...";
-            conn = peer.connect(peerId);
-            setupConnection(peerId);
+            attemptConnect(peerId);
+            startCountdown();
+        }
+
+        function attemptConnect(peerId) {
+            conn = peer.connect(peerId, { reliable: true });
+            conn.on('open', () => setupConnection(peerId));
+        }
+
+        function handlePeerUnavailable() {
+            const remaining = pendingDeadline - Date.now();
+            if (remaining <= 0) {
+                stopConnecting("LINK TIMEOUT. TARGET UNREACHABLE.");
+                return;
+            }
+            statusEl.innerText = "TARGET OFFLINE. RETRYING...";
+            retryTimer = setTimeout(() => {
+                if (pendingPeerId) attemptConnect(pendingPeerId);
+            }, RETRY_INTERVAL_MS);
+        }
+
+        function startCountdown() {
+            clearInterval(countdownTimer);
+            countdownTimer = setInterval(() => {
+                const remaining = Math.max(0, Math.ceil((pendingDeadline - Date.now()) / 1000));
+                waitCountdownEl.innerText = remaining + "S";
+                if (remaining <= 0) {
+                    stopConnecting("LINK TIMEOUT. TARGET UNREACHABLE.");
+                }
+            }, 250);
+        }
+
+        function stopConnecting(message) {
+            pendingPeerId = null;
+            clearTimeout(retryTimer);
+            clearInterval(countdownTimer);
+            waitBox.style.display = 'none';
+            connectBtn.disabled = false;
+            peerIdInput.disabled = false;
+            if (conn && !conn.open) conn = null;
+            if (message) statusEl.innerText = message;
         }
 
         // Chunking architecture state (Receiver)
@@ -171,12 +340,24 @@
         let receiveStartTime = 0;
 
         function setupConnection(connectedId) {
-            conn.on('open', () => {
-                statusEl.innerText = "UPLINK SECURED. P2P ACTIVE.";
-                connectBox.style.display = 'none';
-                transferBox.style.display = 'block';
-                document.getElementById('connectedToId').innerText = connectedId;
-                saveRecentPeer(connectedId);
+            pendingPeerId = null;
+            clearTimeout(retryTimer);
+            clearInterval(countdownTimer);
+            waitBox.style.display = 'none';
+            connectBtn.disabled = false;
+            peerIdInput.disabled = false;
+
+            statusEl.innerText = "UPLINK SECURED. P2P ACTIVE.";
+            connectBox.style.display = 'none';
+            transferBox.style.display = 'block';
+            document.getElementById('connectedToId').innerText = connectedId;
+            saveRecentPeer(connectedId);
+
+            conn.on('close', () => {
+                statusEl.innerText = "LINK LOST.";
+                transferBox.style.display = 'none';
+                connectBox.style.display = 'block';
+                conn = null;
             });
 
             conn.on('data', (data) => {
@@ -187,51 +368,92 @@
                     receiveStartTime = performance.now();
                     statusEl.innerText = "INCOMING TRANSMISSION...";
                     speedKbpsEl.classList.add('glitch');
-                } 
+                }
                 else if (data.type === 'chunk') {
                     receiveBuffer.push(data.chunk);
                     receiveBytes += data.chunk.byteLength;
                     updateTelemetryUI(receiveBytes, receiveMeta.size, receiveStartTime);
-                } 
+                }
                 else if (data.type === 'eof') {
                     speedKbpsEl.classList.remove('glitch');
                     statusEl.innerText = "TRANSMISSION COMPLETE.";
-                    
+
                     const blob = new Blob(receiveBuffer);
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
                     a.download = receiveMeta.filename;
                     a.click();
-                    
+
                     setTimeout(resetTelemetryUI, 3000);
                 }
             });
         }
 
-        document.getElementById('sendFileBtn').onclick = () => fileInput.click();
-        
+        // --- Send: File / Media / Paste ---
+        document.getElementById('fileBtn').onclick = () => fileInput.click();
+        document.getElementById('mediaBtn').onclick = () => mediaInput.click();
+        document.getElementById('pasteBtn').onclick = () => sendFromClipboard();
+
         fileInput.addEventListener('change', (event) => {
             const file = event.target.files[0];
+            fileInput.value = '';
+            if (file) sendFile(file);
+        });
+
+        mediaInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            mediaInput.value = '';
+            if (file) sendFile(file);
+        });
+
+        async function sendFromClipboard() {
+            if (!conn) return;
+            try {
+                if (navigator.clipboard && navigator.clipboard.read) {
+                    const items = await navigator.clipboard.read();
+                    for (const item of items) {
+                        for (const type of item.types) {
+                            if (type.startsWith('image/')) {
+                                const blob = await item.getType(type);
+                                const ext = type.split('/')[1] || 'png';
+                                sendFile(new File([blob], `clipboard.${ext}`, { type }));
+                                return;
+                            }
+                        }
+                    }
+                }
+                const text = await navigator.clipboard.readText();
+                if (text) {
+                    sendFile(new File([text], 'clipboard.txt', { type: 'text/plain' }));
+                } else {
+                    statusEl.innerText = "CLIPBOARD EMPTY.";
+                }
+            } catch (err) {
+                statusEl.innerText = "CLIPBOARD ACCESS DENIED.";
+            }
+        }
+
+        function sendFile(file) {
             if (!file || !conn) return;
 
             statusEl.innerText = `TRANSMITTING: ${file.name}`;
             speedKbpsEl.classList.add('glitch');
-            
+
             // File Chunking Algorithm (Sender)
             const CHUNK_SIZE = 256 * 1024; // 256 KB per chunk
             let offset = 0;
             const startTime = performance.now();
-            
+
             conn.send({ type: 'header', filename: file.name, size: file.size });
 
             const reader = new FileReader();
             reader.onload = (e) => {
                 conn.send({ type: 'chunk', chunk: e.target.result });
                 offset += CHUNK_SIZE;
-                
+
                 updateTelemetryUI(Math.min(offset, file.size), file.size, startTime);
-                
+
                 if (offset < file.size) {
                     // Backpressure check to prevent WebRTC channel crashing
                     if (conn.dataChannel.bufferedAmount > 16 * 1024 * 1024) {
@@ -251,19 +473,19 @@
                 const slice = file.slice(offset, offset + CHUNK_SIZE);
                 reader.readAsArrayBuffer(slice);
             }
-            
+
             readNextChunk();
-        });
+        }
 
         // Telemetry Engine
         function updateTelemetryUI(currentBytes, totalBytes, startTime) {
             const elapsed = (performance.now() - startTime) / 1000; // seconds
             const bps = currentBytes / (elapsed || 0.001);
-            
+
             const kbps = (bps / 1024).toFixed(0);
             const mbps = (bps / (1024 * 1024)).toFixed(1);
             const percent = ((currentBytes / totalBytes) * 100).toFixed(0);
-            
+
             const currentMb = (currentBytes / (1024 * 1024)).toFixed(1);
             const totalMb = (totalBytes / (1024 * 1024)).toFixed(1);
 
@@ -287,7 +509,7 @@
             let recent = JSON.parse(localStorage.getItem('radar_recent') || '[]');
             if (!recent.includes(id)) {
                 recent.unshift(id);
-                if (recent.length > 3) recent.pop(); 
+                if (recent.length > 3) recent.pop();
                 localStorage.setItem('radar_recent', JSON.stringify(recent));
             }
         }
@@ -305,6 +527,59 @@
                     recentList.appendChild(btn);
                 });
             }
+        }
+
+        // --- Copy own ID ---
+        document.getElementById('copyIdBtn').onclick = async () => {
+            try {
+                await navigator.clipboard.writeText(myId);
+                statusEl.innerText = "CALLSIGN COPIED.";
+            } catch (err) {
+                statusEl.innerText = "COPY FAILED.";
+            }
+        };
+
+        // --- Settings: custom 3-4 word callsign ---
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsOverlay = document.getElementById('settingsOverlay');
+        const settingsClose = document.getElementById('settingsClose');
+        const customIdInput = document.getElementById('customIdInput');
+        const customIdError = document.getElementById('customIdError');
+        const saveIdBtn = document.getElementById('saveIdBtn');
+        const randomIdBtn = document.getElementById('randomIdBtn');
+
+        settingsBtn.onclick = () => {
+            customIdInput.value = myId.includes('-') && myId.split('-').length >= 3 ? myId.replace(/-/g, ' ') : '';
+            customIdError.innerText = '';
+            settingsOverlay.classList.add('active');
+        };
+        settingsClose.onclick = () => settingsOverlay.classList.remove('active');
+        settingsOverlay.onclick = (e) => { if (e.target === settingsOverlay) settingsOverlay.classList.remove('active'); };
+
+        saveIdBtn.onclick = () => {
+            const parsed = parseCustomCallsign(customIdInput.value);
+            if (!parsed) {
+                customIdError.innerText = 'Enter exactly 3-4 words, letters only.';
+                return;
+            }
+            applyNewId(parsed);
+            settingsOverlay.classList.remove('active');
+        };
+
+        randomIdBtn.onclick = () => {
+            applyNewId(generateId());
+            settingsOverlay.classList.remove('active');
+        };
+
+        function applyNewId(newId) {
+            myId = newId;
+            saveMyId(myId);
+            document.getElementById('myId').innerText = myId;
+            stopConnecting(null);
+            transferBox.style.display = 'none';
+            connectBox.style.display = 'block';
+            statusEl.innerText = "CALLSIGN UPDATED. RECONNECTING TO NETWORK...";
+            createPeer(myId);
         }
     </script>
 </body>

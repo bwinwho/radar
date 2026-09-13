@@ -3,83 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RADAR</title>
+    <title>RADAR // ACTIVE</title>
     <style>
-        :root { --bg: #0a0a0a; --text: #f4f4f4; --accent: #ff2a2a; }
+        :root { --bg: #050505; --text: #f4f4f4; --accent: #ff2a2a; --grid: #111; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
-        body { background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; height: 100vh; padding-top: 10vh; }
-        header { font-size: 2rem; font-weight: 700; letter-spacing: -1px; text-transform: uppercase; margin-bottom: 2rem; }
-        .box { background: #1a1a1a; padding: 2rem; width: 320px; border: 1px solid #333; margin-bottom: 1rem; }
-        .label { font-size: 0.8rem; text-transform: uppercase; color: #888; margin-bottom: 0.5rem; display: block; }
-        .id-display { font-size: 2.5rem; font-weight: bold; color: var(--accent); letter-spacing: 2px; text-align: center; margin-bottom: 1rem; }
-        input[type="text"] { width: 100%; padding: 1rem; background: var(--bg); border: 1px solid #333; color: var(--text); font-size: 1.2rem; text-align: center; margin-bottom: 1rem; outline: none; text-transform: uppercase;}
-        button { width: 100%; background: var(--text); color: var(--bg); border: none; padding: 1rem; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: background 0.2s; }
+        body { background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; padding-bottom: 2rem; }
+        
+        /* Swiss / Telemetry Typography */
+        header { width: 100%; max-width: 400px; margin-top: 2rem; padding: 0 1rem; }
+        h1 { font-size: 3rem; font-weight: 800; letter-spacing: -2px; text-transform: uppercase; line-height: 1; }
+        .subtitle { font-size: 0.7rem; text-transform: uppercase; color: #888; letter-spacing: 1px; margin-bottom: 2rem; }
+        .subtitle span { color: var(--accent); font-weight: bold; }
+
+        /* Interface Boxes */
+        .panel { background: transparent; width: 100%; max-width: 400px; border: 1px solid #333; padding: 1.5rem; margin-bottom: 1rem; position: relative; }
+        .panel::before, .panel::after { content: ''; position: absolute; width: 8px; height: 8px; border: 1px solid var(--accent); }
+        .panel::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+        .panel::after { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+        
+        .label { font-size: 0.65rem; text-transform: uppercase; color: #666; margin-bottom: 0.5rem; display: block; letter-spacing: 1px; }
+        .id-display { font-size: 3rem; font-weight: 800; color: var(--accent); letter-spacing: 1px; text-align: center; }
+        
+        input[type="text"] { width: 100%; padding: 1rem; background: var(--bg); border: 1px solid #333; color: var(--text); font-size: 1.5rem; text-align: center; margin-bottom: 1rem; outline: none; text-transform: uppercase; font-weight: bold; letter-spacing: 2px;}
+        input[type="text"]:focus { border-color: var(--accent); }
+        
+        button { width: 100%; background: var(--text); color: var(--bg); border: none; padding: 1rem; font-weight: 800; text-transform: uppercase; cursor: pointer; transition: all 0.2s; letter-spacing: 1px; }
         button:hover { background: var(--accent); color: var(--text); }
-        .recent-btn { background: transparent; border: 1px solid #333; color: #888; margin-top: 0.5rem; }
-        .recent-btn:hover { background: #333; color: var(--text); }
+        
+        .recent-btn { background: transparent; border: 1px solid #333; color: #888; margin-top: 0.5rem; font-size: 0.8rem; }
+        .recent-btn:hover { background: #1a1a1a; color: var(--accent); border-color: var(--accent); }
         input[type="file"] { display: none; }
-        #status { margin-top: 1rem; font-size: 0.9rem; color: #888; text-align: center; }
-        #recentBox { display: none; }
+
+        /* Radar Animation */
+        .radar-box { display: flex; justify-content: center; align-items: center; height: 250px; position: relative; margin-bottom: 1rem; width: 100%; max-width: 400px; background: radial-gradient(circle, #1a0505 0%, var(--bg) 70%); border: 1px solid #222; overflow: hidden; }
+        .grid-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-size: 20px 20px; background-image: linear-gradient(to right, var(--grid) 1px, transparent 1px), linear-gradient(to bottom, var(--grid) 1px, transparent 1px); z-index: 1; opacity: 0.5; }
+        .radar-ring { position: absolute; border: 1px solid rgba(255,42,42,0.3); border-radius: 50%; z-index: 2; }
+        .ring-1 { width: 80px; height: 80px; }
+        .ring-2 { width: 160px; height: 160px; }
+        .ring-3 { width: 240px; height: 240px; }
+        .sweep { position: absolute; width: 120px; height: 120px; transform-origin: bottom right; top: 5px; left: 5px; background: linear-gradient(45deg, rgba(255,42,42,0.8) 0%, rgba(255,42,42,0) 100%); animation: sweep 2s linear infinite; z-index: 3; border-radius: 100% 0 0 0; }
+        @keyframes sweep { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Telemetry UI */
+        #transferBox { display: none; border-color: var(--accent); }
+        .telemetry-speed { font-size: 3.5rem; font-weight: 900; color: var(--accent); line-height: 1; margin: 0.5rem 0; letter-spacing: -2px; }
+        .telemetry-mbps { font-size: 1.5rem; font-weight: bold; color: var(--text); margin-bottom: 1rem; }
+        
+        .progress-container { width: 100%; height: 20px; background: #111; border: 1px solid #333; margin-bottom: 0.5rem; position: relative; }
+        .progress-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.1s linear; }
+        .progress-stats { display: flex; justify-content: space-between; font-size: 0.7rem; color: #888; font-family: monospace; }
+        
+        #status { font-family: monospace; font-size: 0.8rem; color: #666; text-align: center; margin-top: 1rem; text-transform: uppercase; }
+        .glitch { animation: glitch 0.2s linear infinite; }
+        @keyframes glitch { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <header>Radar.</header>
+    <header>
+        <h1>Radar.</h1>
+        <div class="subtitle">Local Telemetry Over Wi-Fi // <span>Active</span></div>
+    </header>
 
-    <div class="box">
-        <span class="label">Your Radar ID</span>
+    <div class="radar-box">
+        <div class="grid-overlay"></div>
+        <div class="radar-ring ring-1"></div>
+        <div class="radar-ring ring-2"></div>
+        <div class="radar-ring ring-3"></div>
+        <div class="sweep"></div>
+    </div>
+
+    <div class="panel">
+        <span class="label">Identification Callsign</span>
         <div class="id-display" id="myId">---</div>
     </div>
 
-    <div class="box" id="connectBox">
-        <span class="label">Connect to Peer</span>
-        <input type="text" id="peerIdInput" placeholder="Enter ID" maxlength="4">
-        <button id="connectBtn">Connect</button>
+    <div class="panel" id="connectBox">
+        <span class="label">Target Coordinates (Peer ID)</span>
+        <input type="text" id="peerIdInput" placeholder="CODE-00" maxlength="7">
+        <button id="connectBtn">Establish Link</button>
         
-        <div id="recentBox">
-            <span class="label" style="margin-top: 1.5rem;">Recent Connections</span>
+        <div id="recentBox" style="display: none; margin-top: 1.5rem;">
+            <span class="label">Recent Targets</span>
             <div id="recentList"></div>
         </div>
     </div>
 
-    <div class="box" id="transferBox" style="display: none;">
-        <span class="label">Connected To: <span id="connectedToId"></span></span>
-        <button id="sendFileBtn">Select & Send File</button>
+    <div class="panel" id="transferBox">
+        <span class="label">Linked To: <span id="connectedToId" style="color: var(--accent);"></span></span>
+        
+        <div style="margin: 2rem 0;">
+            <span class="label">Blazing High-Speed Telemetry</span>
+            <div class="telemetry-speed" id="speedKbps">0 KBPS</div>
+            <div class="telemetry-mbps" id="speedMbps">SPEED: 0.0 MB/S</div>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="progress-stats">
+                <span id="progressPercent">0%</span>
+                <span id="progressData">0.0 MB / 0.0 MB</span>
+            </div>
+        </div>
+
+        <button id="sendFileBtn">Transmit Data</button>
         <input type="file" id="fileInput">
     </div>
 
-    <div id="status">Waiting for network...</div>
+    <div id="status">Awaiting Network...</div>
 
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script>
-        const generateId = () => Math.random().toString(36).substring(2, 6).toUpperCase();
+        // Generate Military-Style Callsign
+        const words = ["XOXO", "NEON", "WAVE", "NOVA", "ECHO", "ZULU", "KILO", "JEDI", "RIOT", "DASH", "VOID", "HAWK"];
+        const generateId = () => {
+            const w = words[Math.floor(Math.random() * words.length)];
+            const n = Math.floor(10 + Math.random() * 90);
+            return `${w}-${n}`;
+        };
+        
         const myId = generateId();
         document.getElementById('myId').innerText = myId;
 
         const peer = new Peer(myId);
         let conn;
 
+        // UI Elements
         const statusEl = document.getElementById('status');
         const connectBox = document.getElementById('connectBox');
         const transferBox = document.getElementById('transferBox');
         const fileInput = document.getElementById('fileInput');
         const recentBox = document.getElementById('recentBox');
         const recentList = document.getElementById('recentList');
+        
+        // Telemetry Elements
+        const speedKbpsEl = document.getElementById('speedKbps');
+        const speedMbpsEl = document.getElementById('speedMbps');
+        const progressBarEl = document.getElementById('progressBar');
+        const progressPercentEl = document.getElementById('progressPercent');
+        const progressDataEl = document.getElementById('progressData');
 
-        // Load saved peers on startup
         loadRecentPeers();
 
-        peer.on('open', () => {
-            statusEl.innerText = "Ready to connect.";
-        });
+        peer.on('open', () => statusEl.innerText = "SYSTEM READY. WAITING FOR TARGET.");
 
-        // Handle incoming connection
         peer.on('connection', (connection) => {
             conn = connection;
             setupConnection(conn.peer);
         });
 
-        // Initiate connection from input
         document.getElementById('connectBtn').onclick = () => {
             const peerId = document.getElementById('peerIdInput').value.toUpperCase();
             initiateConnection(peerId);
@@ -87,39 +159,135 @@
 
         function initiateConnection(peerId) {
             if (!peerId) return;
-            statusEl.innerText = "Connecting...";
+            statusEl.innerText = "ESTABLISHING UPLINK...";
             conn = peer.connect(peerId);
             setupConnection(peerId);
         }
 
+        // Chunking architecture state (Receiver)
+        let receiveBuffer = [];
+        let receiveMeta = null;
+        let receiveBytes = 0;
+        let receiveStartTime = 0;
+
         function setupConnection(connectedId) {
             conn.on('open', () => {
-                statusEl.innerText = "Secure P2P connection established.";
+                statusEl.innerText = "UPLINK SECURED. P2P ACTIVE.";
                 connectBox.style.display = 'none';
                 transferBox.style.display = 'block';
                 document.getElementById('connectedToId').innerText = connectedId;
-                
                 saveRecentPeer(connectedId);
             });
 
             conn.on('data', (data) => {
-                if (data.file && data.filename) {
-                    const blob = new Blob([data.file]);
+                if (data.type === 'header') {
+                    receiveBuffer = [];
+                    receiveMeta = data;
+                    receiveBytes = 0;
+                    receiveStartTime = performance.now();
+                    statusEl.innerText = "INCOMING TRANSMISSION...";
+                    speedKbpsEl.classList.add('glitch');
+                } 
+                else if (data.type === 'chunk') {
+                    receiveBuffer.push(data.chunk);
+                    receiveBytes += data.chunk.byteLength;
+                    updateTelemetryUI(receiveBytes, receiveMeta.size, receiveStartTime);
+                } 
+                else if (data.type === 'eof') {
+                    speedKbpsEl.classList.remove('glitch');
+                    statusEl.innerText = "TRANSMISSION COMPLETE.";
+                    
+                    const blob = new Blob(receiveBuffer);
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = data.filename;
+                    a.download = receiveMeta.filename;
                     a.click();
-                    statusEl.innerText = `Received: ${data.filename}`;
+                    
+                    setTimeout(resetTelemetryUI, 3000);
                 }
             });
         }
 
+        document.getElementById('sendFileBtn').onclick = () => fileInput.click();
+        
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file || !conn) return;
+
+            statusEl.innerText = `TRANSMITTING: ${file.name}`;
+            speedKbpsEl.classList.add('glitch');
+            
+            // File Chunking Algorithm (Sender)
+            const CHUNK_SIZE = 256 * 1024; // 256 KB per chunk
+            let offset = 0;
+            const startTime = performance.now();
+            
+            conn.send({ type: 'header', filename: file.name, size: file.size });
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                conn.send({ type: 'chunk', chunk: e.target.result });
+                offset += CHUNK_SIZE;
+                
+                updateTelemetryUI(Math.min(offset, file.size), file.size, startTime);
+                
+                if (offset < file.size) {
+                    // Backpressure check to prevent WebRTC channel crashing
+                    if (conn.dataChannel.bufferedAmount > 16 * 1024 * 1024) {
+                        setTimeout(readNextChunk, 50);
+                    } else {
+                        readNextChunk();
+                    }
+                } else {
+                    conn.send({ type: 'eof' });
+                    speedKbpsEl.classList.remove('glitch');
+                    statusEl.innerText = "DATA UPLOADED SUCCESSFULLY.";
+                    setTimeout(resetTelemetryUI, 3000);
+                }
+            };
+
+            function readNextChunk() {
+                const slice = file.slice(offset, offset + CHUNK_SIZE);
+                reader.readAsArrayBuffer(slice);
+            }
+            
+            readNextChunk();
+        });
+
+        // Telemetry Engine
+        function updateTelemetryUI(currentBytes, totalBytes, startTime) {
+            const elapsed = (performance.now() - startTime) / 1000; // seconds
+            const bps = currentBytes / (elapsed || 0.001);
+            
+            const kbps = (bps / 1024).toFixed(0);
+            const mbps = (bps / (1024 * 1024)).toFixed(1);
+            const percent = ((currentBytes / totalBytes) * 100).toFixed(0);
+            
+            const currentMb = (currentBytes / (1024 * 1024)).toFixed(1);
+            const totalMb = (totalBytes / (1024 * 1024)).toFixed(1);
+
+            speedKbpsEl.innerText = Number(kbps).toLocaleString() + ' KBPS';
+            speedMbpsEl.innerText = `SPEED: ${mbps} MB/S`;
+            progressBarEl.style.width = percent + '%';
+            progressPercentEl.innerText = percent + '%';
+            progressDataEl.innerText = `${currentMb} MB / ${totalMb} MB`;
+        }
+
+        function resetTelemetryUI() {
+            speedKbpsEl.innerText = '0 KBPS';
+            speedMbpsEl.innerText = 'SPEED: 0.0 MB/S';
+            progressBarEl.style.width = '0%';
+            progressPercentEl.innerText = '0%';
+            progressDataEl.innerText = '0.0 MB / 0.0 MB';
+        }
+
+        // Local Storage Memory
         function saveRecentPeer(id) {
             let recent = JSON.parse(localStorage.getItem('radar_recent') || '[]');
             if (!recent.includes(id)) {
-                recent.unshift(id); // Add to beginning
-                if (recent.length > 5) recent.pop(); // Keep only last 5
+                recent.unshift(id);
+                if (recent.length > 3) recent.pop(); 
                 localStorage.setItem('radar_recent', JSON.stringify(recent));
             }
         }
@@ -138,26 +306,6 @@
                 });
             }
         }
-
-        // Handle File Sending
-        document.getElementById('sendFileBtn').onclick = () => fileInput.click();
-        
-        fileInput.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (!file || !conn) return;
-
-            statusEl.innerText = `Sending ${file.name}...`;
-            
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                conn.send({
-                    file: e.target.result,
-                    filename: file.name
-                });
-                statusEl.innerText = "File sent successfully.";
-            };
-            reader.readAsArrayBuffer(file);
-        });
     </script>
 </body>
 </html>

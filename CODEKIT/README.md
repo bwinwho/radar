@@ -1,56 +1,60 @@
-# CodeKit
+# RADAR
 
-A project workspace with a documentation kit; an application has not yet been added here.
+A single-page web app for sending a file directly from one browser to another, peer-to-peer, with a live transfer speedometer.
 
-"CodeKit" is the folder name. The official product name is **Not confirmed yet**.
+"RADAR" is confirmed from the app's own page title (`RADAR // ACTIVE`) and on-screen heading (`Radar.`).
 
 ## What Is This?
 
-This folder currently holds project notes that help the owner and future developers understand the work and continue it across sessions. When it was inspected on **2026-09-12**, it was empty. The seven documentation files are the first recorded contents of this workspace.
+RADAR lets two people connect their browsers directly to each other and send something — a file, a photo/video, or whatever's on your clipboard — without uploading it to a server first. Each visitor gets a callsign, random by default (like `NEON-42`) or a custom one you set yourself; one person shares their callsign with the other, who types it in to "Establish Link." If the other device isn't online yet, RADAR keeps trying for up to a minute before giving up, so you don't have to time it perfectly. Once connected, either side can send, and both sides watch a live speed and progress readout while it transfers.
 
-The intended software product and its purpose are **Unknown**.
+The whole app is one file: `index.html`, in the repository root.
 
 ## Why Does It Exist?
 
-The owner requested a permanent project memory so decisions, changes, bugs, and explanations do not disappear between conversations. The problem the future application will solve is **Not confirmed yet**.
+**Not confirmed yet.** The code is self-explanatory about *what* it does (direct browser-to-browser file transfer), but the motivating problem, target audience, and any prior history of this project are not documented anywhere in the repository.
 
 ## What Can It Do?
 
-### Available
+### Available (confirmed from `index.html`)
 
-- Explain how agents should communicate with the owner.
-- Give a new contributor a short briefing and a place to record technical facts.
-- Keep a dated history and rules for updating documentation with future code changes.
-
-These are documentation capabilities. No software features have been implemented in this folder.
+- Generates a random, memorable "callsign" identity for each visitor (no sign-up or account) — and remembers it across visits, so it doesn't change every time you reload the page.
+- A Settings panel (gear icon) lets you replace your callsign with your own custom one, as long as it's exactly 3 or 4 words (e.g. "apple river stone").
+- Lets one visitor connect directly to another by typing their callsign. If the other device isn't online yet, RADAR automatically retries for up to 60 seconds, showing a countdown, before giving up — you can also cancel manually at any time.
+- Remembers the last 3 peers you've connected to (in your browser only) so you can reconnect with one click.
+- Three ways to send once connected: **File** (any file type), **Media** (opens your photo/video picker or camera on mobile), and **Paste** (sends whatever's currently on your clipboard — an image or text).
+- Sends directly between the two connected browsers, in the background, over a direct peer-to-peer connection — nothing passes through a server that stores it.
+- Shows a live transfer speed (KBPS and MB/s) and a progress bar with a percentage and byte count while something is sending or receiving.
+- Automatically downloads the received item on the receiving side once the transfer completes.
+- Works as a centered card on desktop and a naturally stacking, scrollable screen on mobile.
 
 ### Planned
 
-No product features or roadmap have been confirmed. The documentation instructions are not an application feature plan.
+No roadmap or planned features are confirmed anywhere in this repository.
 
 ## How It Works
 
-Start with `PROJECT_MEMORY.md` for the current situation. Use `AGENTS.md` for technical details and `DEVLOG.md` to understand recorded changes. Future work should update these notes alongside the code it changes.
+Open `index.html` in a browser (or visit the deployed site). The page gets you a callsign automatically. To connect to someone else, they share their callsign with you (or vice versa), you type it into "Target Coordinates," and click "Establish Link." Once linked, click "Transmit Data" to pick and send a file — it goes straight to the other browser.
 
-There is no application flow to describe yet.
+Under the hood, this uses a browser technology called WebRTC (via a helper library called PeerJS) that lets two browsers talk to each other directly once they've found each other, rather than routing your file through a server.
 
 ## Current Status
 
-**Documentation-only workspace**, verified on **2026-09-12**. Product development stage and release status are **Unknown**. This folder is not currently a Git repository, so it has no local Git change history.
+A working, deployed single-file app. The owner states it is live at **https://radatit.pages.dev** (Cloudflare Pages); this workspace has not independently verified that the deployed site matches the current `index.html` in this repository.
 
 ## Getting Started
 
-Read [PROJECT_MEMORY.md](PROJECT_MEMORY.md), then [AGENTS.md](AGENTS.md) before doing development work. There is nothing to install, build, or launch from the files currently present.
+There is nothing to install or build — `index.html` is a complete, self-contained web page (it loads its one dependency, PeerJS, from a CDN). Opening the file in a browser, or serving the repository with any static file server, runs the app locally.
 
-Before development can begin, establish whether an existing application's files belong here or whether a new product needs to be defined. Setup commands will be documented once actual source and configuration exist.
+Read [PROJECT_MEMORY.md](PROJECT_MEMORY.md) for the current situation, then [AGENTS.md](AGENTS.md) for the technical walkthrough, before making changes.
 
 ## Project Structure
 
 | Document | What it tells you |
 | --- | --- |
 | [LANGUAGE.md](LANGUAGE.md) | How agents should explain their work |
-| [AGENTS.md](AGENTS.md) | How the project works technically, once confirmed |
-| [README.md](README.md) | What this project is |
+| [AGENTS.md](AGENTS.md) | How the project works technically |
+| [README.md](README.md) | What this project is (this file) |
 | [MARKET.md](MARKET.md) | How to describe the product without unsupported claims |
 | [DEVLOG.md](DEVLOG.md) | What happened and why |
 | [PROJECT_MEMORY.md](PROJECT_MEMORY.md) | Where things stand now |
@@ -58,4 +62,7 @@ Before development can begin, establish whether an existing application's files 
 
 ## Important Notes and Current Limitations
 
-No source code, dependencies, tests, database configuration, or deployment files were available during the initial inspection. Product capabilities, users, hosting, and earlier history are **Unknown**. These notes describe this folder, not any uninspected project elsewhere. Never put passwords or access tokens into the documentation.
+- There is no server-side storage, accounts, or authentication — connections are only as trustworthy as the callsign exchange between the two people involved.
+- Connectivity relies on a third-party signaling service (PeerJS's default public server) and plain STUN; some network setups may be unable to connect peer-to-peer. Not independently tested from this workspace.
+- The receiving browser holds the whole incoming file in memory before saving it, so very large files could be demanding on the receiver's device (see [AGENTS.md](AGENTS.md) for detail).
+- No passwords or access tokens are used by, or should ever be added to, this documentation.

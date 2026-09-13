@@ -1,47 +1,59 @@
-# CodeKit
+# RADAR
 
-Working label from the folder name. Official product name: **Not confirmed yet**.
+Confirmed product name, from the app's page title and heading in `index.html`.
 
 ## One-Line Pitch
 
-**Not confirmed yet.** There is no implemented product or confirmed product brief from which to write a truthful product pitch.
+Send a file straight from your browser to someone else's — no upload, no account, just a callsign.
+
+This is a direct, evidence-based description of the implemented feature set (direct P2P transfer, callsign-based connect, no accounts), not a claim about market positioning, competitors, or customer validation.
 
 ## The Problem
 
-The intended customer's problem is **Unknown**.
+The intended customer and validated problem are **Unknown** — no product brief, customer research, or positioning notes exist in this repository.
 
-The owner has identified a development-process problem: project knowledge can be lost between sessions or become difficult for a non-technical owner to follow. The documentation kit addresses that internal need; it is not evidence of the eventual product's market positioning.
+What the code itself solves: sending a file from one browser to another without routing it through, or storing it on, a third-party server.
 
 ## The Idea
 
-The software product's approach is **Not confirmed yet**. The current workspace establishes clear explanations, shared project notes, and a history that future contributors can build on.
+Two people each open the page, get a randomly generated callsign, and connect directly using WebRTC. Once linked, a file transfer goes straight between their browsers, with a live speed/progress readout styled like a "radar telemetry" interface.
 
 ## Signature Features
 
-No application features are confirmed. Feature names and benefit claims should be added only after examining working implementation or clearly identified, owner-approved plans.
+Confirmed, implemented features only (see [AGENTS.md](AGENTS.md) for code references):
+
+- **Instant identity, no sign-up:** a callsign (e.g. `NEON-42`) is generated on first visit and remembered — nothing to register, and it doesn't change on you.
+- **Your own callsign:** swap the generated callsign for a custom 3-4 word one from Settings.
+- **Patient connecting:** if the other device isn't online yet, RADAR keeps trying for up to 60 seconds with a visible countdown, instead of failing instantly.
+- **Three ways to send:** File, Media (photo/video), or Paste (clipboard) — pick whichever fits what you're sharing.
+- **Direct peer-to-peer transfer:** data moves browser-to-browser over WebRTC once connected, not through a storage server.
+- **Live telemetry:** real-time speed (KBPS/MB per second) and a progress bar during transfer.
+- **Recent targets:** the last 3 peers connected to are remembered locally for one-click reconnect.
 
 ## Feature Stories
 
-No product feature stories can be supported yet. For each future confirmed feature, describe what it does, why it matters, and what the user experiences. A memorable headline should clarify a real benefit rather than conceal an implementation gap.
+- **Instant identity, no sign-up** — *What it does:* generates a memorable code name the moment the page loads. *Why it matters:* nothing to create or remember beyond one code, no email or password. *What the user experiences:* opening the page and immediately having something to share with the other person.
+- **Direct peer-to-peer transfer** — *What it does:* opens a direct WebRTC connection between two browsers and streams the file in 256 KB chunks. *Why it matters:* the file doesn't sit on a third-party server in between. *What the user experiences:* pick a file, watch it fly to the other side, done.
+- **Live telemetry** — *What it does:* calculates and displays live throughput and progress while sending or receiving. *Why it matters:* the transfer isn't a black box — you can see it working. *What the user experiences:* a speed readout and progress bar in the app's "radar" visual style.
 
 ## Product Philosophy
 
-Product values are **Unknown**. The owner's confirmed working preferences are clarity, continuity, learning through real work, and documentation that matches the code. Do not extend these preferences into unsupported claims about application privacy, speed, accessibility, or offline reliability.
+Confirmed from the UI itself: a stripped-down, high-contrast "military telemetry / radar" visual identity (dark background, red accents, monospace status lines, callsigns, uplink/transmission language) and a workflow with no accounts or sign-up friction. Broader product values (privacy stance, target audience, long-term philosophy) are **Unknown** beyond what the working app demonstrates.
 
 ## Who Is It For?
 
-Product audience: **Unknown**. The documentation kit serves the project owner, developers, and AI agents continuing work in this folder.
+**Unknown.** No target audience is documented. The app's design (no accounts, technical "callsign"/"uplink" framing) suggests it targets technically comfortable users who want quick ad-hoc file transfer, but this is an inference from the interface only — **Likely:**, not a confirmed positioning decision.
 
 ## Why It Feels Different
 
-Product differentiation is **Not confirmed yet**. There is no implementation or customer evidence available for comparison.
+Not a claim this workspace can validate against competitors. Observably, the app skips the "upload to a server, share a link" pattern common to many file-sharing tools in favor of a live, direct connection — but no comparison research exists in this repository.
 
 ## Short Launch Description
 
-A product launch description is **Not confirmed yet**. The following is an accurate workspace description, not a product launch claim:
+Not confirmed as an approved launch/marketing statement — this is an accurate description of the current implementation only:
 
-> CodeKit currently holds the foundation for an understandable project: plain-language explanations, technical notes, a dated history, and a short briefing for whoever works on it next. Application code and product scope have not yet been added to this workspace.
+> RADAR is a single-page web app where two browsers connect directly and send a file peer-to-peer, with a live speed and progress readout. No accounts, no file uploads to a server — just a shared callsign and a direct link.
 
 ## Evidence Boundary
 
-Baseline inspected on **2026-09-12**. Do not publish unsupported feature claims, statistics, testimonials, performance claims, or comparisons. Revisit this document when product scope and implementation provide evidence for a real story.
+Baseline inspected on **2026-09-13** against the live `index.html` in this repository. Do not publish unsupported claims about user counts, performance benchmarks, security guarantees, uptime, or comparisons to other tools — none of that is established anywhere in this repository. Revisit this document if the app's feature set or the owner's positioning changes.
